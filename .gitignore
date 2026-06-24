@@ -1,0 +1,59 @@
+# --- Secrets / keypairs (never commit these) ---
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+id.json
+**/id.json
+wallet*.json
+keypair*.json
+**/keypairs/
+secrets/
+
+# --- Rust / Anchor ---
+/target
+**/target/
+.anchor/
+test-ledger/
+*.so
+!programs/**/*.rs
+
+# Keep Cargo.lock for binaries/programs; uncomment next line if this becomes a pure library crate
+# Cargo.lock
+
+# --- Node / TypeScript ---
+node_modules/
+dist/
+build/
+.npm-global/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnp.*
+*.tsbuildinfo
+
+# --- Light Protocol / local validator ---
+.light/
+photon.log
+prover.log
+validator.log
+*.log
+
+# --- IDE / editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Anchor IDL build artifacts (regenerate via `anchor build`) ---
+target/idl/
+target/types/
+
+# --- Misc ---
+coverage/
+*.tgz
+.cache/
