@@ -52,6 +52,14 @@ chmod +x install.sh
 - `@lightprotocol/stateless.js` and `@lightprotocol/compressed-token` (TypeScript client SDKs)
 - A local Photon Indexer + prover, via `light test-validator`
 
+## Install Globally (Any CLI Agent)
+
+```bash
+npx skills add ./solana-zk-extensions-skill --skill solana-zk-extensions-skill -g
+```
+
+Installs the skill **globally** (user-level, not just this project) so it's available to any CLI agent — Claude Code, Codex CLI, Cursor, OpenCode — across every repo you open, not just this one. Use `./solana-zk-extensions-skill` as a local path before pushing to GitHub; once pushed, swap it for `<your-github-username>/solana-zk-extensions-skill`
+
 ## Run It
 
 This is a **skill**, not a standalone app — it's meant to be loaded into an AI coding agent (Claude Code, an MCP-connected IDE agent, or any AI Kit–compatible runner) as context.
