@@ -1,4 +1,4 @@
-# security_rules.md
+# Security Rules
 
 **Read this before generating, editing, or reviewing any code under this skill.**
 These rules are not suggestions — refuse to ship code that violates them, and say
@@ -19,7 +19,7 @@ write a new hash (or nothing, for a close) at the same position in the state tre
   re-deriving the address/seed it claims to represent. If the program logic assumes
   `account_meta` corresponds to a specific owner or PDA seed, assert that on-chain —
   do not trust the client to have packed the right one.
-- One validity proof verifies one consistent state transition. Do not attempt to
+## Rule 2 — Enforce valid fresh state roots
   reuse a single `ValidityProof` object across two separate CPIs into the Light
   System Program in the same instruction unless using the documented
   `cpi-context` feature for batched multi-program operations — anything else is
