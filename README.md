@@ -1,14 +1,10 @@
 > AI Kit Skill for safely bridging **Light Protocol ZK Compression** with **Token-2022 Extensions** on Solana.
 
-> AI Kit Skill for safely bridging **Light Protocol ZK Compression** with **Token-2022 Extensions** on Solana.
-
 Submitted for the **Solana AI Kit Bounty** — closing the gap between off-chain compressed state and on-chain Token-2022 CPI logic.
 
 ---
 
 | Primitive | What it does | The catch |
-
-Two of the most important primitives in the 2026 Solana stack don't talk to each other safely out of the box:
 
 | Primitive | What it does | The catch |
 |---|---|---|
@@ -16,8 +12,6 @@ Two of the most important primitives in the 2026 Solana stack don't talk to each
 | **Token-2022 Extensions** (Transfer Hooks, Confidential Transfers) | Lets a token enforce arbitrary on-chain logic (KYC, royalties, tier-gating) on every transfer via a CPI into your program. | The hook's `execute` instruction is invoked **synchronously**, with a fixed account list resolved via `ExtraAccountMetaList`. It has no RPC access and cannot fetch a Photon proof mid-transfer.
 There was no AI context that taught an agent how to wire this correctly. This skill is that context.
 **The friction:** a hook that wants to gate a transfer on compressed state (e.g. *"only let this wallet transfer if their compressed loyalty-tier account says VIP"*) can't just reach out to Light Protocol's system program inside `execute` — `ExtraAccountMetaList` only resolves **pubkeys via seeds**, not arbitrary proof blobs, and there is exactly one validity proof allowed per instruction. Get the routing wrong and you end up with double-spendable compressed leaves, stale-root replay, or a hook that silently no-ops because a "required" extra account was actually skippable.
-
-There was no AI context that taught an agent how to wire this correctly. This skill is that context.
 
 ## What's Inside
 
@@ -39,11 +33,6 @@ git clone https://github.com/<your-org>/solana-zk-extensions-skill.git
 ## Install
 
 ```bash
-git clone https://github.com/<your-org>/solana-zk-extensions-skill.git
-cd solana-zk-extensions-skill
-chmod +x install.sh
-./install.sh
-- `@lightprotocol/stateless.js` and `@lightprotocol/compressed-token` (TypeScript client SDKs)
 
 `install.sh` installs (idempotently — safe to re-run):
 - Rust + the Solana CLI
@@ -51,12 +40,6 @@ chmod +x install.sh
 - `light-sdk` (Rust, added to a Cargo project if one is present) + `@lightprotocol/zk-compression-cli`
 - `@lightprotocol/stateless.js` and `@lightprotocol/compressed-token` (TypeScript client SDKs)
 - A local Photon Indexer + prover, via `light test-validator`
-
-Installs the skill **globally** (user-level, not just this project) so it's available to any CLI agent — Claude Code, Codex CLI, Cursor, OpenCode — across every repo you open, not just this one. Use `./solana-zk-extensions-skill` as a local path before pushing to GitHub; once pushed, swap it for `<your-github-username>/solana-zk-extensions-skill`.
-
-```bash
-npx skills add ./solana-zk-extensions-skill --skill solana-zk-extensions-skill -g
-```
 
 Installs the skill **globally** (user-level, not just this project) so it's available to any CLI agent — Claude Code, Codex CLI, Cursor, OpenCode — across every repo you open, not just this one. Use `./solana-zk-extensions-skill` as a local path before pushing to GitHub; once pushed, swap it for `<your-github-username>/solana-zk-extensions-skill`
 
@@ -69,8 +52,6 @@ This is a **skill**, not a standalone app — it's meant to be loaded into an AI
    - *"Build an Anchor program that stores a user's loyalty tier as a compressed PDA."*
    - *"Add a Token-2022 transfer hook that blocks transfers for non-VIP wallets, checked against compressed state."*
    - *"Write the TypeScript client that fetches the validity proof and submits the gated transfer."*
-3. The router in `SKILL.md` loads only the relevant sub-file(s), and `security_rules.md` is loaded automatically for every code-generation request — non-optional, by design.
-
 To validate generated programs locally:
 
 ## License
