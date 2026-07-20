@@ -1,11 +1,11 @@
-# python_ts_client_agent.md
+# Python/TypeScript Client Agent
 
 Off-chain client template: fetch compressed state + a validity proof from the Photon
 Indexer, pack everything the Anchor program needs, resolve the Token-2022 transfer
 hook's extra accounts, and submit one atomic transaction containing both the
 `verify_loyalty_tier` and `transferChecked` instructions described in
 `transfer_hooks.md`.
-
+## 1. Setup
 TypeScript is the primary, fully-supported client SDK for Light Protocol; Python
 callers should use the JSON-RPC methods directly (shown at the end of this file).
 
@@ -27,7 +27,7 @@ import {
   sendAndConfirmTx,
 } from "@lightprotocol/stateless.js";
 import {
-  Connection,
+```
   Keypair,
   PublicKey,
   TransactionInstruction,
