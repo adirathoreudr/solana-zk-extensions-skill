@@ -1,9 +1,3 @@
-# Python/TypeScript Client Agent
-
-Off-chain client template: fetch compressed state + a validity proof from the Photon
-Indexer, pack everything the Anchor program needs, resolve the Token-2022 transfer
-hook's extra accounts, and submit one atomic transaction containing both the
-`verify_loyalty_tier` and `transferChecked` instructions described in
 `transfer_hooks.md`.
 ## 1. Setup
 TypeScript is the primary, fully-supported client SDK for Light Protocol; Python
