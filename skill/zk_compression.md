@@ -1,4 +1,4 @@
-# ZK Compression Reference
+# zk_compression.md
 
 Reference templates for defining and operating on **Light Protocol compressed accounts**
 inside an Anchor program, plus the off-chain RPC calls (Photon Indexer, via Helius or a
@@ -13,7 +13,7 @@ local `light test-validator`) needed to read state and fetch validity proofs.
 anchor-lang = "0.31.1"
 light-sdk = "0.16.0"
 borsh = "0.10.0"
-## 2. Defining a Compressed Account
+solana-program = "2.2"
 
 [features]
 idl-build = ["anchor-lang/idl-build"]

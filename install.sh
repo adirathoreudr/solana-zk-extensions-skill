@@ -1,12 +1,12 @@
+#!/usr/bin/env bash
 # install.sh — solana-zk-extensions-skill
 # Installs Solana CLI, Anchor CLI, Light Protocol SDKs, and a local Photon Indexer setup.
 # Idempotent: safe to re-run, skips anything already installed.
 
 set -euo pipefail
 
-
-YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
 log()  { echo -e "${GREEN}[install]${NC} $1"; }
