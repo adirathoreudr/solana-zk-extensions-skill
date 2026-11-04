@@ -18,7 +18,14 @@ write a new hash (or nothing, for a close) at the same position in the state tre
 - Never accept a client-supplied `CompressedAccountMeta` without independently
   re-deriving the address/seed it claims to represent. If the program logic assumes
   `account_meta` corresponds to a specific owner or PDA seed, assert that on-chain —
-  do not trust the client to have packed the right one.
+  do not trust the client to have packed the right one. Alternatively, rely on an
+  invariant the program itself enforces (e.g. "addresses are only ever created from
+  `["loyalty", owner]` with `owner` signing, and `owner` is never mutated"), and
+  state that invariant in a code comment next to the check.
+- Pass the account's **complete, unmodified** current contents into `new_mut`. The
+  leaf hash commits to every field, so a zeroed or "don't care" field (e.g.
+  `last_updated_slot: 0`) breaks the proof for honest users. Never "fix" that by
+  excluding fields from the hash.
 - One validity proof verifies one consistent state transition. Do not attempt to
   reuse a single `ValidityProof` object across two separate CPIs into the Light
   System Program in the same instruction unless using the documented
@@ -52,8 +59,12 @@ roll forward as the tree is written by other transactions.
 - Never derive an attestation PDA from data the attacker fully controls without also
   binding it to a signer. Seed attestation PDAs from `(purpose, owner, mint)` at
   minimum, and require `owner` to be a real `Signer` somewhere in the transaction,
-  not just an `UncheckedAccount` reference — see `transfer_hooks.md` §3-5 for the
+  not just an `UncheckedAccount` reference — see `transfer_hooks.md` §4-6 for the
   reference shape, but verify the signer constraint explicitly in generated code.
+- Every instruction that mutates compressed state on someone's behalf (tier changes,
+  balance changes) needs an explicit authority check (`Signer` + `address = ...`
+  or `has_one`). A valid proof only shows the state is *current*. It says nothing
+  about whether the caller is *allowed* to change it.
 - Do not reuse a `recent_blockhash` or proof artifact across transactions as a
   substitute for a nonce. If true offline/durable-nonce signing is required, use
   Solana's native `nonce` accounts explicitly — don't invent an ad hoc replacement.
@@ -69,12 +80,17 @@ roll forward as the tree is written by other transactions.
   **owner program** and **PDA seeds** on-chain. A read-only account with no
   owner/seed check can be substituted by an attacker with a fake account holding
   whatever data they want.
-- If a hook program also implements a `fallback` instruction (pre-Anchor-0.30 pattern)
-  for routing the native Token-2022 CPI, that fallback must dispatch on the exact SPL
-  interface discriminator (`hash("spl_transfer_hook_interface:execute")`), never on
-  Anchor's default `global:` namespace — confusing the two silently no-ops the hook
-  instead of failing loudly. Prefer the `#[interface(spl_transfer_hook_interface::execute)]`
-  attribute (Anchor ≥0.30) over hand-rolled fallback routing wherever possible.
+- The hook's `execute` entrypoint must be reachable under the exact SPL interface
+  discriminator (`hash("spl-transfer-hook-interface:execute")[..8]`), never Anchor's
+  default `global:` one. Confusing the two silently no-ops the hook instead of
+  failing loudly. On Anchor 0.31+, use
+  `#[instruction(discriminator = ExecuteInstruction::SPL_DISCRIMINATOR_SLICE)]`
+  (`#[interface(...)]` is deprecated and needs the `interface-instructions` feature).
+  Only use a hand-rolled `fallback` router on pre-0.30 Anchor.
+- The hook must check that it is actually running inside a Token-2022 transfer: read
+  the `TransferHookAccount` extension of the source and destination token accounts
+  and require `transferring == true`. Otherwise anyone can invoke `execute` directly,
+  for example to consume a victim's single-use attestation.
 - Gating logic must fail closed. If a required attestation/extra account is missing,
   stale, or mismatched, the instruction must error — never default to "allow" when a
   check can't be completed.
