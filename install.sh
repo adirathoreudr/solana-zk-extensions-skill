@@ -1,12 +1,18 @@
+#!/usr/bin/env bash
 # install.sh — solana-zk-extensions-skill
 # Installs Solana CLI, Anchor CLI, Light Protocol SDKs, and a local Photon Indexer setup.
 # Idempotent: safe to re-run, skips anything already installed.
 
 set -euo pipefail
 
+# Versions the skill's templates were compile-checked against. Keep these in sync
+# with skill/zk_compression.md §1 and skill/transfer_hooks.md §1.
+ANCHOR_VERSION="0.31.1"
+LIGHT_SDK_VERSION="0.16.0"
+LIGHT_JS_RANGE="^0.23"
 
-YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
 log()  { echo -e "${GREEN}[install]${NC} $1"; }
@@ -39,15 +45,15 @@ fi
 # ---------------------------------------------------------------------------
 if ! command -v avm &>/dev/null; then
   log "Installing avm (Anchor Version Manager)..."
-  cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+  cargo install --git https://github.com/solana-foundation/anchor avm --locked --force
 fi
 
-if ! command -v anchor &>/dev/null; then
-  log "Installing latest Anchor CLI via avm..."
-  avm install latest
-  avm use latest
-else
+if command -v anchor &>/dev/null && anchor --version | grep -q " ${ANCHOR_VERSION}\$"; then
   log "Anchor CLI already installed: $(anchor --version)"
+else
+  log "Installing Anchor CLI ${ANCHOR_VERSION} via avm (the version the templates target)..."
+  avm install "${ANCHOR_VERSION}"
+  avm use "${ANCHOR_VERSION}"
 fi
 
 # ---------------------------------------------------------------------------
@@ -61,12 +67,17 @@ fi
 # ---------------------------------------------------------------------------
 # 5. Light Protocol — TypeScript client SDKs + CLI
 # ---------------------------------------------------------------------------
-log "Installing Light Protocol TypeScript SDKs (stateless.js + compressed-token)..."
-npm install --no-save \
-  @lightprotocol/stateless.js \
-  @lightprotocol/compressed-token \
-  @solana/web3.js \
-  @solana/spl-token
+if [ -f "package.json" ]; then
+  log "package.json detected — adding Light Protocol TypeScript SDKs to this project..."
+  npm install \
+    "@lightprotocol/stateless.js@${LIGHT_JS_RANGE}" \
+    "@lightprotocol/compressed-token@${LIGHT_JS_RANGE}" \
+    "@solana/web3.js@^1" \
+    "@solana/spl-token@^0.4" \
+    "@coral-xyz/anchor@${ANCHOR_VERSION}"
+else
+  warn "No package.json in current directory — skipping the TypeScript SDK install. Run this script from your client project (or after 'anchor init', which creates one) to add them."
+fi
 
 if ! command -v light &>/dev/null; then
   log "Installing @lightprotocol/zk-compression-cli globally..."
@@ -79,8 +90,10 @@ fi
 # 6. Light Protocol — Rust program SDK (only if a Cargo project is present)
 # ---------------------------------------------------------------------------
 if [ -f "Cargo.toml" ]; then
-  log "Cargo.toml detected — adding light-sdk to this project..."
-  cargo add light-sdk || warn "Could not auto-add light-sdk; add it manually: cargo add light-sdk"
+  log "Cargo.toml detected — adding light-sdk ${LIGHT_SDK_VERSION} to this project..."
+  # Pinned: newer light-sdk releases require a different Anchor major version.
+  cargo add "light-sdk@=${LIGHT_SDK_VERSION}" --features anchor \
+    || warn "Could not auto-add light-sdk (in an Anchor workspace, run this inside programs/<name>/). Add it manually: cargo add light-sdk@=${LIGHT_SDK_VERSION} --features anchor"
 else
   warn "No Cargo.toml in current directory — skipping 'cargo add light-sdk'. Run 'anchor init <name>' first, then re-run this script inside the program directory if you want it added automatically."
 fi

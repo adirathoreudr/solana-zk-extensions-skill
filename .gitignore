@@ -17,7 +17,6 @@ secrets/
 .anchor/
 test-ledger/
 *.so
-!programs/**/*.rs
 
 # Keep Cargo.lock for binaries/programs; uncomment next line if this becomes a pure library crate
 # Cargo.lock
