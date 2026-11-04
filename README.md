@@ -24,7 +24,9 @@ There was no AI context that taught an agent how to wire this correctly. This sk
 ```
 solana-zk-extensions-skill/
 ├── README.md
-├── install.sh
+├── LICENSE
+├── install.sh                         # toolchain + SDK installer (pinned versions)
+├── .env.example                       # copy to .env — HELIUS_API_KEY etc.
 └── skill/
     ├── SKILL.md                       # master router — progressive loading logic
     ├── zk_compression.md              # Light Protocol compressed PDA templates + Photon RPC
@@ -39,7 +41,7 @@ solana-zk-extensions-skill/
 ## Install
 
 ```bash
-git clone https://github.com/<your-org>/solana-zk-extensions-skill.git
+git clone https://github.com/adirathoreudr/solana-zk-extensions-skill.git
 cd solana-zk-extensions-skill
 chmod +x install.sh
 ./install.sh
@@ -47,18 +49,24 @@ chmod +x install.sh
 
 `install.sh` installs (idempotently — safe to re-run):
 - Rust + the Solana CLI
-- Anchor CLI (via `avm`)
-- `light-sdk` (Rust, added to a Cargo project if one is present) + `@lightprotocol/zk-compression-cli`
-- `@lightprotocol/stateless.js` and `@lightprotocol/compressed-token` (TypeScript client SDKs)
-- A local Photon Indexer + prover, via `light test-validator`
+- Anchor CLI **0.31.1** (via `avm`)
+- `@lightprotocol/zk-compression-cli` (the `light` command, which bundles a local Photon Indexer + prover via `light test-validator`)
+- `light-sdk` **0.16.0** with the `anchor` feature, added to the Cargo project in the current directory, if there is one
+- `@lightprotocol/stateless.js` / `@lightprotocol/compressed-token` **^0.23**, `@solana/web3.js`, `@solana/spl-token`, `@coral-xyz/anchor` **0.31.1**, added to the `package.json` in the current directory, if there is one
+
+Then copy `.env.example` to `.env` and set `HELIUS_API_KEY`.
+
+### Versions
+
+The templates target **one** dependency set: Anchor 0.31.1, `light-sdk` 0.16 (Light V1 CPI), `spl-transfer-hook-interface` / `spl-tlv-account-resolution` 0.9, and `@lightprotocol/stateless.js` ^0.23. The Rust code blocks compile (`cargo check`, including `--features idl-build`). The TypeScript blocks type-check under `tsc --strict` against the generated IDL. Upgrading any one of these on its own will break the others (newer `light-sdk` releases require Anchor 1.x), so treat the set as a unit.
 
 ## Install Globally (Any CLI Agent)
 
 ```bash
-npx skills add ./solana-zk-extensions-skill --skill solana-zk-extensions-skill -g
+npx skills add adirathoreudr/solana-zk-extensions-skill --skill solana-zk-extensions-skill -g
 ```
 
-Installs the skill **globally** (user-level, not just this project) so it's available to any CLI agent — Claude Code, Codex CLI, Cursor, OpenCode — across every repo you open, not just this one. Use `./solana-zk-extensions-skill` as a local path before pushing to GitHub; once pushed, swap it for `<your-github-username>/solana-zk-extensions-skill`
+Installs the skill **globally** (user-level, not just this project), so it's available to any CLI agent (Claude Code, Codex CLI, Cursor, OpenCode) in every repo you open. To install from a local clone instead (e.g. while editing the skill), pass the path: `npx skills add ./solana-zk-extensions-skill --skill solana-zk-extensions-skill -g`.
 
 ## Run It
 
@@ -81,24 +89,4 @@ anchor deploy
 
 ## License
 
-MIT License
-
-Copyright (c) 2026 solana-zk-extensions-skill contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+MIT — see [`LICENSE`](LICENSE).
